@@ -50,39 +50,6 @@ const App = () => {
   }, []);
   const mapRef = React.useRef();
 
-  const onMarkerSelected = (event) => {};
-
-  const renderClusters = () => {
-    return (
-      <MapboxGL.ShapeSource
-        url="https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson"
-        id="symbolLocationSource"
-        hitbox={{width: 18, height: 18}}
-        onPress={onMarkerSelected}
-        clusterRadius={50}
-        clusterMaxZoom={14}
-        cluster>
-        <MapboxGL.SymbolLayer
-          id="pointCount"
-          style={layerStyles.clusterCount}
-        />
-        <MapboxGL.CircleLayer
-          id="clusteredPoints"
-          minZoomLevel={6}
-          belowLayerID="pointCount"
-          filter={['has', 'point_count']}
-          style={layerStyles.clusteredPoints}
-        />
-        <MapboxGL.CircleLayer
-          id="singlePoint"
-          minZoomLevel={6}
-          filter={['!', ['has', 'point_count']]}
-          style={layerStyles.singlePoint}
-        />
-      </MapboxGL.ShapeSource>
-    );
-  };
-
   return (
     <>
       <View style={styles.header}>
@@ -103,7 +70,32 @@ const App = () => {
               centerCoordinate={OKLAHOMA_CITY_COORDINATES}
               zoomLevel={8}
             />
-            {renderClusters()}
+            <MapboxGL.ShapeSource
+              url="https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson"
+              id="symbolLocationSource"
+              hitbox={{width: 18, height: 18}}
+              onPress={() => {}}
+              clusterRadius={50}
+              clusterMaxZoom={14}
+              cluster>
+              <MapboxGL.SymbolLayer
+                id="pointCount"
+                style={layerStyles.clusterCount}
+              />
+              <MapboxGL.CircleLayer
+                id="clusteredPoints"
+                minZoomLevel={6}
+                belowLayerID="pointCount"
+                filter={['has', 'point_count']}
+                style={layerStyles.clusteredPoints}
+              />
+              <MapboxGL.CircleLayer
+                id="singlePoint"
+                minZoomLevel={6}
+                filter={['!', ['has', 'point_count']]}
+                style={layerStyles.singlePoint}
+              />
+            </MapboxGL.ShapeSource>
           </MapboxGL.MapView>
         </View>
       </View>
