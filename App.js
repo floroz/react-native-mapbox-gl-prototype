@@ -1,11 +1,25 @@
+/* eslint-disable react-native/no-inline-styles */
 import React from 'react';
 import {StyleSheet, View, Text} from 'react-native';
 import MapboxGL from '@react-native-mapbox-gl/maps';
 import {MAPBOX_API} from '@env';
+import data from './data';
 
 MapboxGL.setAccessToken(MAPBOX_API);
 
-const OKLAHOMA_CITY_COORDINATES = [-97.508469, 35.481918];
+const LONDON_COORDINATES = [-0.118092, 51.509865];
+
+const points = data.map((tree) => ({
+  type: 'Feature',
+  properties: {
+    id: tree.id,
+    name: tree.name,
+  },
+  geometry: {
+    type: 'Point',
+    coordinates: [parseFloat(tree.lng), parseFloat(tree.lat)],
+  },
+}));
 
 const layerStyles = {
   singlePoint: {
@@ -17,25 +31,7 @@ const layerStyles = {
     circlePitchAlignment: 'map',
   },
 
-  clusteredPoints: {
-    circlePitchAlignment: 'map',
-
-    circleColor: [
-      'step',
-      ['get', 'point_count'],
-      '#51bbd6',
-      100,
-      '#f1f075',
-      750,
-      '#f28cb1',
-    ],
-
-    circleRadius: ['step', ['get', 'point_count'], 20, 100, 30, 750, 40],
-
-    circleOpacity: 0.84,
-    circleStrokeWidth: 2,
-    circleStrokeColor: 'white',
-  },
+  clusteredPoints: {},
 
   clusterCount: {
     textField: '{point_count}',
@@ -67,11 +63,15 @@ const App = () => {
             <MapboxGL.Camera
               animationDuration={250}
               animationMode="flyTo"
-              centerCoordinate={OKLAHOMA_CITY_COORDINATES}
+              centerCoordinate={LONDON_COORDINATES}
               zoomLevel={8}
             />
             <MapboxGL.ShapeSource
-              url="https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson"
+              // url="https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson"
+              shape={{
+                type: 'FeatureCollection',
+                features: [...points],
+              }}
               id="symbolLocationSource"
               hitbox={{width: 18, height: 18}}
               onPress={() => {}}
@@ -84,10 +84,26 @@ const App = () => {
               />
               <MapboxGL.CircleLayer
                 id="clusteredPoints"
-                minZoomLevel={6}
                 belowLayerID="pointCount"
                 filter={['has', 'point_count']}
-                style={layerStyles.clusteredPoints}
+                style={{
+                  circlePitchAlignment: 'map',
+                  circleColor: 'green',
+                  circleRadius: [
+                    'step',
+                    ['get', 'point_count'],
+                    20,
+                    100,
+                    25,
+                    250,
+                    30,
+                    750,
+                    40,
+                  ],
+                  circleOpacity: 0.84,
+                  circleStrokeWidth: 0,
+                  circleStrokeColor: 'blue',
+                }}
               />
               <MapboxGL.CircleLayer
                 id="singlePoint"
