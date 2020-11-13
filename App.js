@@ -1,9 +1,10 @@
 /* eslint-disable react-native/no-inline-styles */
-import React from 'react';
+import React, {useState} from 'react';
 import {StyleSheet, View, Text} from 'react-native';
 import MapboxGL from '@react-native-mapbox-gl/maps';
 import {MAPBOX_API} from '@env';
 import data from './data';
+import treePNG from './tree.png';
 
 MapboxGL.setAccessToken(MAPBOX_API);
 
@@ -41,11 +42,14 @@ const layerStyles = {
 };
 
 const App = () => {
+  const [marker, setMarker] = useState(null);
+
   React.useEffect(() => {
     MapboxGL.setTelemetryEnabled(false);
   }, []);
-  const mapRef = React.useRef();
 
+  const mapRef = React.useRef();
+  console.log(marker);
   return (
     <>
       <View style={styles.header}>
@@ -67,14 +71,21 @@ const App = () => {
               zoomLevel={8}
             />
             <MapboxGL.ShapeSource
-              // url="https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson"
               shape={{
                 type: 'FeatureCollection',
                 features: [...points],
               }}
               id="symbolLocationSource"
               hitbox={{width: 18, height: 18}}
-              onPress={() => {}}
+              onPress={(point) => {
+                console.log('selected: ', point.features[0].properties);
+
+                if (point.features[0].properties.cluster) {
+                  setMarker(null);
+                } else {
+                  setMarker(point.features[0]);
+                }
+              }}
               clusterRadius={50}
               clusterMaxZoom={14}
               cluster>
@@ -105,11 +116,24 @@ const App = () => {
                   circleStrokeColor: 'blue',
                 }}
               />
-              <MapboxGL.CircleLayer
+
+              {marker && (
+                <MapboxGL.PointAnnotation
+                  id="testPoint"
+                  coordinate={[...marker.geometry.coordinates]}
+                  title={marker.properties.name}>
+                  <View>
+                    <Text>Test</Text>
+                  </View>
+                </MapboxGL.PointAnnotation>
+              )}
+              <MapboxGL.SymbolLayer
                 id="singlePoint"
-                minZoomLevel={6}
                 filter={['!', ['has', 'point_count']]}
-                style={layerStyles.singlePoint}
+                style={{
+                  iconImage: treePNG,
+                  iconSize: 0.05,
+                }}
               />
             </MapboxGL.ShapeSource>
           </MapboxGL.MapView>
